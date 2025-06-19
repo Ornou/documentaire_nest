@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 import { CreateDocumentInput } from './create-document.input';
 import { InputType, Field, Int, PartialType } from '@nestjs/graphql';
 

@@ -4,23 +4,15 @@ import { UpdateUserInput } from './dto/update-user.input';
 
 @Injectable()
 export class UserService {
-  create(createUserInput: CreateUserInput) {
-    return 'This action adds a new user';
-  }
+  constructor(private users: CreateUserInput) {}
 
-  findAll() {
-    return `This action returns all user`;
-  }
-
-  findOne(id: number) {
-    return `This action returns a #${id} user`;
-  }
-
-  update(id: number, updateUserInput: UpdateUserInput) {
-    return `This action updates a #${id} user`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} user`;
+   async register(username: string, email: string, password: string) {
+    // Logic to register a user
+    // This could involve saving the user to a database, sending a confirmation email, etc.
+    return {
+      username,
+      email,
+      password,
+    };
   }
 }

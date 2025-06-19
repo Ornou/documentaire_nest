@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 import { CreateUserInput } from './create-user.input';
 import { InputType, Field, Int, PartialType } from '@nestjs/graphql';
 
