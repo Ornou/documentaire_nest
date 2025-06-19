@@ -1,4 +1,4 @@
-import { Controller, Get } from '@nestjs/common';
+import { Controller, Get, Post } from '@nestjs/common';
 import { HealthService } from './health.service';
 
 @Controller('health')
@@ -8,5 +8,10 @@ export class HealthController {
   @Get()
   check() {
     return this.healthService.check();
+  }
+
+  @Post('add-job')
+  async addJob() {
+    return await this.healthService.addJobToDocumentQueue();
   }
 }
