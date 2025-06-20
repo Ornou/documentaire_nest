@@ -4,6 +4,8 @@ import { BullModule } from '@nestjs/bullmq';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { HealthModule } from './health/health.module';
+import { DocumentModule } from './document/document.module';
+import { UserModule } from './user/user.module';
 
 @Module({
   imports: [
@@ -14,6 +16,8 @@ import { HealthModule } from './health/health.module';
         port: 6379,
       },
     }),
+    DocumentModule,
+    UserModule,
   ],
   controllers: [AppController],
   providers: [AppService],
