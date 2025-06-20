@@ -6,8 +6,6 @@ export class CreateDocumentInput {
   title: string;
   @Field(() => String)
   description: string;
-  @Field(() => String, { nullable: true })
+  @Field({ nullable: true })
   fileUrl?: string;
-  @Field(() => Number)
-  userId: number;
 }

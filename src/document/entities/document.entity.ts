@@ -16,4 +16,10 @@ export class Document {
 
   @Field(() => Int)
   userId: number;
+
+  @Field()
+  createdAt: Date;
+
+  @Field()
+  updatedAt: Date;
 }

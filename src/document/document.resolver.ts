@@ -1,19 +1,40 @@
-import { Resolver, Query, Mutation, Args, Int } from '@nestjs/graphql';
+import { Resolver, Query, Mutation, Args, Int, Context } from '@nestjs/graphql';
 import { DocumentService } from './document.service';
 import { CreateDocumentInput } from './dto/create-document.input';
 import { UpdateDocumentInput } from './dto/update-document.input';
 import { Document } from "./entities/document.entity";
 import { UseGuards } from '@nestjs/common';
-import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
+import { JwtService } from '@nestjs/jwt';
+import { ConfigService } from '@nestjs/config';
 
 @Resolver(() => Document)
 export class DocumentResolver {
-  constructor(private readonly documentService: DocumentService) {}
+  constructor(
+    private readonly documentService: DocumentService,
+    private readonly jwtService: JwtService,
+    private readonly configService: ConfigService
+  ) {}
 
-  @UseGuards(JwtAuthGuard)
   @Mutation(() => Document)
-  createDocument(@Args('createDocumentInput') createDocumentInput: CreateDocumentInput) {
-    return this.documentService.create(createDocumentInput);
+  async createDocument(
+    @Args('createDocumentInput') createDocumentInput: CreateDocumentInput,
+    @Context() context
+  ) {
+    const token = context.req.headers.authorization?.split(' ')[1];
+
+    if (!token) {
+      throw new Error('Token JWT non fourni');
+    }
+
+    try {
+      const decoded = this.jwtService.verify(token, {
+        secret: this.configService.get<string>('JWT_SECRET') || 'secret',
+      });
+
+      return this.documentService.create(createDocumentInput, decoded);
+    } catch (error) {
+      throw new Error('Token JWT invalide');
+    }
   }
 
   @Query(() => [Document], { name: 'document' })

@@ -1,23 +1,49 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, ExecutionContext } from '@nestjs/common';
 import { CreateDocumentInput } from './dto/create-document.input';
 import { UpdateDocumentInput } from './dto/update-document.input';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { ConfigService } from '@nestjs/config';
+import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
 export class DocumentService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private configService: ConfigService,
+    private jwtService: JwtService
+  ) {}
 
-  create(createDocumentInput: CreateDocumentInput) {
-    return this.prisma.document.create({
-      data: {
-        title: createDocumentInput.title,
-        description: createDocumentInput.description,
-        fileUrl: createDocumentInput.fileUrl,
-        user: {
-          connect: { id: createDocumentInput.userId },
+  async create(createDocumentInput: CreateDocumentInput, decoded: any) {
+    if (!decoded) {
+      throw new Error('Token JWT non fourni');
+    }
+
+    try {
+      // Vérifier si l'utilisateur existe
+      const user = await this.prisma.user.findUnique({
+        where: { id: decoded.sub }
+      });
+
+      if (!user) {
+        throw new Error('Utilisateur non trouvé');
+      }
+
+      const now = new Date();
+      return this.prisma.document.create({
+        data: {
+          title: createDocumentInput.title,
+          description: createDocumentInput.description,
+          fileUrl: createDocumentInput.fileUrl,
+          user: {
+            connect: { id: decoded.sub },
+          },
+          createdAt: now,
+          updatedAt: now,
         },
-      },
-    });
+      });
+    } catch (error) {
+      throw new Error('Token JWT invalide');
+    }
   }
 
   findAll() {
