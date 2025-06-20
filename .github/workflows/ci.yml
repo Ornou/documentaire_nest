@@ -34,11 +34,11 @@ jobs:
       - name: Build
         run: npm run build
 
-      - name: Build Dokcer Image
-        run: docker build -t my-app .
-
       - name: Login to Docker Hub
         run: docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Build Dokcer Image
+        run: docker build -t my-app .
 
       - name: Push Docker Image to Docker Hub
         uses: docker/build-push-action@v5
