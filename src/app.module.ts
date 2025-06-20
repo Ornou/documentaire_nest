@@ -1,4 +1,4 @@
-/* eslint-disable prettier/prettier */
+
 import { Module } from '@nestjs/common';
 import { BullModule } from '@nestjs/bullmq';
 import { AppController } from './app.controller';
@@ -6,7 +6,8 @@ import { AppService } from './app.service';
 import { HealthModule } from './health/health.module';
 import { DocumentModule } from './document/document.module';
 import { UserModule } from './user/user.module';
-
+import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
+import { GraphQLModule } from '@nestjs/graphql';
 @Module({
   imports: [
     HealthModule,
@@ -18,6 +19,11 @@ import { UserModule } from './user/user.module';
     }),
     DocumentModule,
     UserModule,
+    GraphQLModule.forRoot<ApolloDriverConfig>({
+      driver: ApolloDriver,
+      autoSchemaFile: true,
+      playground: true
+    })
   ],
   controllers: [AppController],
   providers: [AppService],
