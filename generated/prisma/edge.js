@@ -142,7 +142,7 @@ const config = {
       "value": "prisma-client-js"
     },
     "output": {
-      "value": "C:\\Users\\ADMIN\\Desktop\\documentaire_nest\\generated\\prisma",
+      "value": "C:\\Users\\TRETEC\\Documents\\EFREI 2024-2025\\S2\\Projet Web\\documentaire_nest\\generated\\prisma",
       "fromEnvVar": null
     },
     "config": {
@@ -156,7 +156,7 @@ const config = {
       }
     ],
     "previewFeatures": [],
-    "sourceFilePath": "C:\\Users\\ADMIN\\Desktop\\documentaire_nest\\prisma\\schema.prisma",
+    "sourceFilePath": "C:\\Users\\TRETEC\\Documents\\EFREI 2024-2025\\S2\\Projet Web\\documentaire_nest\\prisma\\schema.prisma",
     "isCustomOutput": true
   },
   "relativeEnvPaths": {

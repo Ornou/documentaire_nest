@@ -6,6 +6,7 @@ import { AppService } from './app.service';
 import { HealthModule } from './health/health.module';
 import { DocumentModule } from './document/document.module';
 import { UserModule } from './user/user.module';
+import { AuthModule } from './auth/auth.module';
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 import { GraphQLModule } from '@nestjs/graphql';
 import { PrismaModule } from './prisma/prisma.moule';
@@ -20,6 +21,7 @@ import { PrismaModule } from './prisma/prisma.moule';
     }),
     DocumentModule,
     UserModule,
+    AuthModule,
     PrismaModule,
     GraphQLModule.forRoot<ApolloDriverConfig>({
       driver: ApolloDriver,

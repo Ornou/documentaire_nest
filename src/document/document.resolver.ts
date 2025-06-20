@@ -2,6 +2,7 @@ import { Resolver, Query, Mutation, Args, Int } from '@nestjs/graphql';
 import { DocumentService } from './document.service';
 import { CreateDocumentInput } from './dto/create-document.input';
 import { UpdateDocumentInput } from './dto/update-document.input';
+import { Document } from "./entities/document.entity";
 
 @Resolver(() => Document)
 export class DocumentResolver {
