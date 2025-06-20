@@ -3,7 +3,7 @@ import { BullModule } from '@nestjs/bullmq';
 import { HealthService } from './health.service';
 import { HealthController } from './health.controller';
 import { DocumentProcessor } from './document.processor';
-import { DocumentModule } from './document/document.module';
+import { DocumentModule } from '../document/document.module';
 
 @Module({
   imports: [
