@@ -8,6 +8,7 @@ import { DocumentModule } from './document/document.module';
 import { UserModule } from './user/user.module';
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 import { GraphQLModule } from '@nestjs/graphql';
+import { PrismaModule } from './prisma/prisma.moule';
 @Module({
   imports: [
     HealthModule,
@@ -19,6 +20,7 @@ import { GraphQLModule } from '@nestjs/graphql';
     }),
     DocumentModule,
     UserModule,
+    PrismaModule,
     GraphQLModule.forRoot<ApolloDriverConfig>({
       driver: ApolloDriver,
       autoSchemaFile: true,
