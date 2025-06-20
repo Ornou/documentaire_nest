@@ -1,0 +1,32 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  user
+  admin
+}
+
+model User {
+  id        Int        @id @default(autoincrement())
+  name      String
+  email     String
+  password  String
+  role      Role?      @default(user) // Le rôle est optionnel (user/admin)
+  documents Document[] // Un utilisateur peut avoir plusieurs documents
+}
+
+model Document {
+  id          Int     @id @default(autoincrement())
+  title       String
+  description String
+  fileUrl     String? // Champ optionnel
+  user        User    @relation(fields: [userId], references: [id])
+  userId      Int // Clé étrangère vers User
+}
