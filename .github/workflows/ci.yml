@@ -3,10 +3,10 @@ name: CI
 on:
   push:
     branches:
-      - main
+      - master
   pull_request:
     branches:
-      - main
+      - master
 
 jobs:
   test:
@@ -36,3 +36,18 @@ jobs:
 
       - name: Build Dokcer Image
         run: docker build -t my-app .
+
+      - name: Login to Docker Hub
+        run: docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Push Docker Image to Docker Hub
+        run: docker push ${{ secrets.DOCKER_USERNAME }}/my-app:latest
+
+      - name: Deploy to render
+        uses: renderinc/render-action@v1
+        with:
+          token: ${{ secrets.RENDER_TOKEN }}
+          project_id: ${{ secrets.RENDER_PROJECT_ID }}
+          service_id: ${{ secrets.RENDER_SERVICE_ID }}
+          branch: main
+          environment: production
