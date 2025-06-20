@@ -8,4 +8,6 @@ export class CreateDocumentInput {
   description: string;
   @Field(() => String, { nullable: true })
   fileUrl?: string;
+  @Field(() => Number)
+  userId: number;
 }

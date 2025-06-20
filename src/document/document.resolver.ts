@@ -3,11 +3,14 @@ import { DocumentService } from './document.service';
 import { CreateDocumentInput } from './dto/create-document.input';
 import { UpdateDocumentInput } from './dto/update-document.input';
 import { Document } from "./entities/document.entity";
+import { UseGuards } from '@nestjs/common';
+import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 
 @Resolver(() => Document)
 export class DocumentResolver {
   constructor(private readonly documentService: DocumentService) {}
 
+  @UseGuards(JwtAuthGuard)
   @Mutation(() => Document)
   createDocument(@Args('createDocumentInput') createDocumentInput: CreateDocumentInput) {
     return this.documentService.create(createDocumentInput);
