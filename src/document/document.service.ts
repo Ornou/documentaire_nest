@@ -4,39 +4,56 @@ import { UpdateDocumentInput } from './dto/update-document.input';
 import { PrismaService } from '../prisma/prisma.service';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
+import { Queue } from 'bullmq';
+import { InjectQueue } from '@nestjs/bullmq';
 
 @Injectable()
 export class DocumentService {
   constructor(
     private prisma: PrismaService,
     private configService: ConfigService,
-    private jwtService: JwtService
+    private jwtService: JwtService,
+    @InjectQueue('document') private documentQueue: Queue,
   ) {}
 
   /**
    * Créer un document lié à l'utilisateur connecté
    */
   async create(createDocumentInput: CreateDocumentInput, userId: number) {
-    const user = await this.prisma.user.findUnique({
-      where: { id: userId },
-    });
+    try {
+      const user = await this.prisma.user.findUnique({
+        where: { id: userId },
+      });
 
-    if (!user) {
-      throw new Error('Utilisateur non trouvé');
-    }
+      if (!user) {
+        throw new Error('Utilisateur non trouvé');
+      }
 
-    return this.prisma.document.create({
-      data: {
-        title: createDocumentInput.title,
-        description: createDocumentInput.description,
-        fileUrl: createDocumentInput.fileUrl,
-        user: {
-          connect: { id: userId },
+      const now = new Date();
+      const document = await this.prisma.document.create({
+        data: {
+          title: createDocumentInput.title,
+          description: createDocumentInput.description,
+          fileUrl: createDocumentInput.fileUrl,
+          user: {
+            connect: { id: userId },
+          },
+          createdAt: now,
+          updatedAt: now,
         },
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      },
-    });
+      });
+
+      // Envoie l'événement dans la queue
+      await this.documentQueue.add('document.created', {
+        documentId: document.id,
+        userId: userId,
+        timestamp: now,
+      });
+
+      return document;
+    } catch (error) {
+      throw new Error(error.message || 'Erreur lors de la création');
+    }
   }
 
   /**
@@ -95,20 +112,21 @@ export class DocumentService {
    * Supprimer un document par ID
    */
   async remove(id: number, userId: number) {
-    const document = await this.prisma.document.findUnique({
-      where: { id },
-    });
+    try {
+      const document = await this.prisma.document.delete({
+        where: { id },
+      });
 
-    if (!document) {
-      throw new Error('Document non trouvé');
+      await this.documentQueue.add('document.deleted', {
+        documentId: document.id,
+        userId: userId,
+        timestamp: new Date(),
+      });
+
+      return document;
+    } catch (error) {
+      throw new Error(error.message || 'Erreur lors de la suppression');
     }
-
-    if (document.userId !== userId) {
-      throw new Error('Accès refusé : vous ne pouvez pas supprimer ce document.');
-    }
-
-    return this.prisma.document.delete({
-      where: { id },
-    });
   }
+
 }
