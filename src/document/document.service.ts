@@ -1,11 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import { CreateDocumentInput } from './dto/create-document.input';
-import { UpdateDocumentInput } from './dto/update-document.input';
-import { PrismaService } from '../prisma/prisma.service';
+import { PrismaService } from 'src/prisma/prisma.service';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { Queue } from 'bullmq';
 import { InjectQueue } from '@nestjs/bullmq';
+import * as fs from 'fs';
+import * as path from 'path';
+import { UpdateDocumentInput } from './dto/update-document.input';
 
 @Injectable()
 export class DocumentService {
@@ -19,14 +21,26 @@ export class DocumentService {
   /**
    * Créer un document lié à l'utilisateur connecté
    */
-  async create(createDocumentInput: CreateDocumentInput, userId: number) {
+  async create(createDocumentInput: CreateDocumentInput, userId: number, file?: Express.Multer.File) {
     try {
-      const user = await this.prisma.user.findUnique({
-        where: { id: userId },
-      });
+      const user = await this.prisma.user.findUnique({ where: { id: userId } });
+      if (!user) throw new Error('Utilisateur non trouvé');
 
-      if (!user) {
-        throw new Error('Utilisateur non trouvé');
+      let fileUrl: string;
+      const uploadDir = path.join(__dirname, '..', '..', 'uploads');
+      await fs.promises.mkdir(uploadDir, { recursive: true });
+
+      if (file) {
+        const fileName = `${Date.now()}_${file.originalname}`;
+        const filePath = path.join(uploadDir, fileName);
+        fs.writeFileSync(filePath, file.buffer);
+        fileUrl = `http://localhost:3000/uploads/${fileName}`;
+      } else {
+        const safeTitle = createDocumentInput.title.replace(/[^a-zA-Z0-9_-]/g, '_');
+        const fileName = `${Date.now()}_${safeTitle}.txt`;
+        const filePath = path.join(uploadDir, fileName);
+        fs.writeFileSync(filePath, createDocumentInput.title);
+        fileUrl = `http://localhost:3000/uploads/${fileName}`;
       }
 
       const now = new Date();
@@ -34,25 +48,22 @@ export class DocumentService {
         data: {
           title: createDocumentInput.title,
           description: createDocumentInput.description,
-          fileUrl: createDocumentInput.fileUrl,
-          user: {
-            connect: { id: userId },
-          },
+          fileUrl: fileUrl,
+          user: { connect: { id: userId } },
           createdAt: now,
           updatedAt: now,
         },
       });
 
-      // Envoie l'événement dans la queue
       await this.documentQueue.add('document.created', {
         documentId: document.id,
-        userId: userId,
+        userId,
         timestamp: now,
       });
 
       return document;
     } catch (error) {
-      throw new Error(error.message || 'Erreur lors de la création');
+      throw new Error(error.message || 'Erreur lors de la création du document');
     }
   }
 
