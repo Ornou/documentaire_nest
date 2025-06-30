@@ -1,11 +1,13 @@
-import { Resolver} from '@nestjs/graphql';
+import { Resolver, Query } from '@nestjs/graphql';
 import { HealthService } from './health.service';
-@Resolver(()=> String)
+
+@Resolver()
 export class HealthResolver {
 
   constructor(private readonly healthService: HealthService) {}
-    @Resolver(() => String)
-    check() {
-      return this.healthService.check();
-    }
+
+  @Query(() => String)
+  check() {
+    return this.healthService.check();
+  }
 }
