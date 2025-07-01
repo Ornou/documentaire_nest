@@ -4,8 +4,8 @@ import { CreateDocumentInput } from './dto/create-document.input';
 import { UpdateDocumentInput } from './dto/update-document.input';
 import { Document } from "./entities/document.entity";
 import { UseGuards } from '@nestjs/common';
-import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
-import { CurrentUser } from 'src/auth/current-user.decorator';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { CurrentUser } from '../auth/current-user.decorator';
 
 @Resolver(() => Document)
 export class DocumentResolver {
