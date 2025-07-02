@@ -27,6 +27,7 @@ describe('DocumentService', () => {
         { provide: PrismaService, useValue: mockPrismaService },
         { provide: ConfigService, useValue: { get: jest.fn() } },
         { provide: JwtService, useValue: { verify: jest.fn() } },
+        {provide: 'BullQueue_document', useValue: { add: jest.fn() }},
       ],
     }).compile();
 
@@ -44,29 +45,23 @@ describe('DocumentService', () => {
   describe('create', () => {
     it('should create a document', async () => {
       const createDto = { title: 'Test', description: 'Test desc', fileUrl: 'http://test.com/file.pdf' };
-      const decoded = { sub: 1 };
       const user = { id: 1, email: 'test@test.com', name: 'Test User' };
       const document = { id: 1, ...createDto, userId: 1, createdAt: new Date(), updatedAt: new Date() };
 
       mockPrismaService.user.findUnique.mockResolvedValue(user);
       mockPrismaService.document.create.mockResolvedValue(document);
 
-      const result = await service.create(createDto, decoded);
+      const result = await service.create(createDto, user.id);
       expect(result).toEqual(document);
-      expect(mockPrismaService.user.findUnique).toHaveBeenCalledWith({ where: { id: decoded.sub } });
+      expect(mockPrismaService.user.findUnique).toHaveBeenCalledWith({ where: { id: user.id } });
       expect(mockPrismaService.document.create).toHaveBeenCalled();
-    });
-
-    it('should throw an error if token is not provided', async () => {
-        const createDto = { title: 'Test', description: 'Test desc', fileUrl: 'http://test.com/file.pdf' };
-        await expect(service.create(createDto, null)).rejects.toThrow('Token JWT non fourni');
     });
 
     it('should throw an error if user is not found', async () => {
         const createDto = { title: 'Test', description: 'Test desc', fileUrl: 'http://test.com/file.pdf' };
-        const decoded = { sub: 1 };
+        const userId = 1;
         mockPrismaService.user.findUnique.mockResolvedValue(null);
-        await expect(service.create(createDto, decoded)).rejects.toThrow('Token JWT invalide');
+        await expect(service.create(createDto, userId)).rejects.toThrow('Utilisateur non trouvé');
     });
   });
 
@@ -93,7 +88,7 @@ describe('DocumentService', () => {
         const updateDto = { id: 1, title: 'Updated Title' };
         const document = { id: 1, title: 'Updated Title', description: 'Test desc', fileUrl: 'url', userId: 1, createdAt: new Date(), updatedAt: new Date() };
         mockPrismaService.document.update.mockResolvedValue(document);
-        const result = await service.update(1, updateDto);
+        const result = await service.update(1, updateDto,document.userId);
         expect(result).toEqual(document);
     });
   });
@@ -102,7 +97,7 @@ describe('DocumentService', () => {
     it('should remove a document', async () => {
         const document = { id: 1, title: 'Test', description: 'Test desc', fileUrl: 'url', userId: 1, createdAt: new Date(), updatedAt: new Date() };
         mockPrismaService.document.delete.mockResolvedValue(document);
-        const result = await service.remove(1);
+        const result = await service.remove(1,document.userId);
         expect(result).toEqual(document);
     });
   });

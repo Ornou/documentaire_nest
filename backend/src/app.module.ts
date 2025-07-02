@@ -10,8 +10,6 @@ import { AuthModule } from './auth/auth.module';
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 import { GraphQLModule } from '@nestjs/graphql';
 import { PrismaModule } from './prisma/prisma.moule';
-import { GqlExecutionContext } from '@nestjs/graphql';
-import { ExecutionContext } from '@nestjs/common';
 
 @Module({
   imports: [
