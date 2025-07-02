@@ -163,6 +163,8 @@ export default function DashboardPage() {
         variables: {
           id: selectedDocument.id,
         },
+        errorPolicy: "all",
+        refetchQueries: ["FindAllDocuments"],
       });
 
       // Remove from local state
@@ -173,6 +175,27 @@ export default function DashboardPage() {
       setSelectedDocument(null);
     } catch (err: any) {
       console.error("Delete error:", err);
+      console.error("Delete error details:", {
+        name: err.name,
+        message: err.message,
+        graphQLErrors: err.graphQLErrors,
+        networkError: err.networkError,
+        extraInfo: err.extraInfo,
+      });
+
+      if (err instanceof ApolloError) {
+        if (err.networkError) {
+          console.error("Delete network error details:", err.networkError);
+          // @ts-ignore
+          if (err.networkError.result) {
+            // @ts-ignore
+            console.error(
+              "Delete network error result:",
+              err.networkError.result
+            );
+          }
+        }
+      }
       // You might want to show an error toast here
     } finally {
       setDeleteLoading(false);

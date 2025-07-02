@@ -73,6 +73,8 @@ export default function DocumentModal({
               fileUrl: formData.fileUrl || null,
             },
           },
+          errorPolicy: "all",
+          refetchQueries: ["FindAllDocuments"],
         });
       } else if (mode === "edit" && document) {
         await client.mutate({
@@ -80,11 +82,14 @@ export default function DocumentModal({
           variables: {
             id: document.id,
             updateDocumentInput: {
+              id: document.id,
               title: formData.title,
               description: formData.description,
               fileUrl: formData.fileUrl || null,
             },
           },
+          errorPolicy: "all",
+          refetchQueries: ["FindAllDocuments"],
         });
       }
 
@@ -92,9 +97,29 @@ export default function DocumentModal({
       onClose();
     } catch (err: any) {
       console.error("Document operation error:", err);
+      console.error("Error details:", {
+        name: err.name,
+        message: err.message,
+        graphQLErrors: err.graphQLErrors,
+        networkError: err.networkError,
+        extraInfo: err.extraInfo,
+      });
+
       if (err instanceof ApolloError) {
+        if (err.networkError) {
+          console.error("Network error details:", err.networkError);
+          // @ts-ignore
+          if (err.networkError.result) {
+            // @ts-ignore
+            console.error("Network error result:", err.networkError.result);
+          }
+        }
+
         const errorMessage =
-          err.graphQLErrors?.[0]?.message || err.message || "Operation failed";
+          err.graphQLErrors?.[0]?.message ||
+          err.networkError?.message ||
+          err.message ||
+          "Operation failed";
         setError(errorMessage);
       } else {
         setError("Operation failed. Please try again.");
