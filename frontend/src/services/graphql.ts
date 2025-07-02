@@ -125,6 +125,12 @@ export const DELETE_DOCUMENT = gql`
   mutation RemoveDocument($id: Int!) {
     removeDocument(id: $id) {
       id
+      title
+      description
+      fileUrl
+      userId
+      createdAt
+      updatedAt
     }
   }
 `;

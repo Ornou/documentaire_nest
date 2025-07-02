@@ -158,7 +158,12 @@ export default function DashboardPage() {
 
     setDeleteLoading(true);
     try {
-      await client.mutate({
+      console.log("Attempting to delete document:", {
+        id: selectedDocument.id,
+        title: selectedDocument.title,
+      });
+
+      const result = await client.mutate({
         mutation: DELETE_DOCUMENT,
         variables: {
           id: selectedDocument.id,
@@ -166,6 +171,8 @@ export default function DashboardPage() {
         errorPolicy: "all",
         refetchQueries: ["FindAllDocuments"],
       });
+
+      console.log("Delete mutation result:", result);
 
       // Remove from local state
       setDocuments((prev) =>
@@ -186,13 +193,22 @@ export default function DashboardPage() {
       if (err instanceof ApolloError) {
         if (err.networkError) {
           console.error("Delete network error details:", err.networkError);
-          // @ts-ignore
-          if (err.networkError.result) {
-            // @ts-ignore
-            console.error(
-              "Delete network error result:",
-              err.networkError.result
-            );
+          const networkError = err.networkError as any;
+          if (networkError.result) {
+            console.error("Delete network error result:", networkError.result);
+            if (networkError.result.errors) {
+              console.error(
+                "Specific GraphQL errors:",
+                networkError.result.errors
+              );
+              networkError.result.errors.forEach(
+                (error: any, index: number) => {
+                  console.error(`Error ${index + 1}:`, error.message);
+                  console.error(`Error path:`, error.path);
+                  console.error(`Error extensions:`, error.extensions);
+                }
+              );
+            }
           }
         }
       }
