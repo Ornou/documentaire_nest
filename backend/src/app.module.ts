@@ -16,7 +16,7 @@ import { PrismaModule } from './prisma/prisma.moule';
     HealthModule,
     BullModule.forRoot({
       connection: {
-        host: 'localhost',
+        host: process.env.REDIS_HOST||'localhost', 
         port: 6379,
       },
     }),
