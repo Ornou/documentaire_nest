@@ -71,7 +71,7 @@ export class DocumentService {
    * Récupérer tous les documents
    */
   async findAll() {
-    return this.prisma.document.findMany({
+    return await this.prisma.document.findMany({
       include: { user: true },
     });
   }
@@ -123,10 +123,13 @@ export class DocumentService {
    * Supprimer un document par ID
    */
   async remove(id: number, userId: number) {
+    console.log('Suppression du document avec l\'ID :', id);
     try {
       const document = await this.prisma.document.delete({
         where: { id },
       });
+
+      console.log(document);
 
       await this.documentQueue.add('document.deleted', {
         documentId: document.id,

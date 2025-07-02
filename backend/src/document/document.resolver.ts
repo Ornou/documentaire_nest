@@ -1,4 +1,4 @@
-import { Resolver, Query, Mutation, Args} from '@nestjs/graphql';
+import { Resolver, Query, Mutation, Args, Int} from '@nestjs/graphql';
 import { DocumentService } from './document.service';
 import { CreateDocumentInput } from './dto/create-document.input';
 import { UpdateDocumentInput } from './dto/update-document.input';
@@ -28,14 +28,14 @@ export class DocumentResolver {
 
   @Query(() => Document)
   @UseGuards(JwtAuthGuard)
-  async findOneDocument(@Args('id', { type: () => Number }) id: number) {
+  async findOneDocument(@Args('id', { type: () => Int }) id: number) {
     return this.documentService.findOne(id);
   }
 
   @UseGuards(JwtAuthGuard)
   @Mutation(() => Document)
   async updateDocument(
-    @Args('id', { type: () => Number }) id: number,
+    @Args('id', { type: () => Int }) id: number,
     @Args('updateDocumentInput') updateDocumentInput: UpdateDocumentInput,
     @CurrentUser() user: any,
   ) {
@@ -45,7 +45,7 @@ export class DocumentResolver {
   @UseGuards(JwtAuthGuard)
   @Mutation(() => Document)
   async removeDocument(
-    @Args('id', { type: () => Number }) id: number,
+    @Args('id', { type: () => Int }) id: number,
     @CurrentUser() user: any,
   ) {
     return this.documentService.remove(id, user.sub);
