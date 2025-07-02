@@ -52,11 +52,8 @@ jobs:
           push: true
           tags: ${{ secrets.DOCKER_USERNAME }}/my-app:latest
  
-      # - name: Deploy to render
-      #   uses: renderinc/render-action@v1
-      #   with:
-      #     token: ${{ secrets.RENDER_TOKEN }}
-      #     project_id: ${{ secrets.RENDER_PROJECT_ID }}
-      #     service_id: ${{ secrets.RENDER_SERVICE_ID }}
-      #     branch: main
-      #     environment: production
+      - name: Deploy to render
+        uses: render-examples/render-deploy-action@v1
+        with:
+          api-key: ${{ secrets.RENDER_API_KEY }}
+          service-id: ${{ secrets.RENDER_SERVICE_ID }}
