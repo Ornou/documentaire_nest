@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { authService } from "@/services/auth";
 import { EyeIcon, EyeSlashIcon } from "@heroicons/react/24/outline";
+import { ApolloError } from "@apollo/client";
 
 export default function LoginPage() {
   const [formData, setFormData] = useState({
@@ -25,7 +26,15 @@ export default function LoginPage() {
       await authService.login(formData.email, formData.password);
       router.push("/dashboard");
     } catch (err: any) {
-      setError(err.response?.data?.message || "Login failed");
+      console.error("Login error:", err);
+      if (err instanceof ApolloError) {
+        // Handle GraphQL errors
+        const errorMessage =
+          err.graphQLErrors?.[0]?.message || err.message || "Login failed";
+        setError(errorMessage);
+      } else {
+        setError("Login failed. Please try again.");
+      }
     } finally {
       setLoading(false);
     }

@@ -26,6 +26,35 @@ export const client = new ApolloClient({
   cache: new InMemoryCache(),
 });
 
+// Authentication Mutations
+export const LOGIN_MUTATION = gql`
+  mutation Login($loginInput: LoginInput!) {
+    login(loginInput: $loginInput) {
+      access_token
+      user {
+        id
+        name
+        email
+        role
+      }
+    }
+  }
+`;
+
+export const REGISTER_MUTATION = gql`
+  mutation Register($registerInput: RegisterInput!) {
+    register(registerInput: $registerInput) {
+      access_token
+      user {
+        id
+        name
+        email
+        role
+      }
+    }
+  }
+`;
+
 // GraphQL Queries and Mutations
 export const GET_ALL_DOCUMENTS = gql`
   query GetAllDocuments {

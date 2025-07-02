@@ -1,10 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import React, { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { authService } from "@/services/auth";
 import { EyeIcon, EyeSlashIcon } from "@heroicons/react/24/outline";
+import { ApolloError } from "@apollo/client";
 
 export default function RegisterPage() {
   const [formData, setFormData] = useState({
@@ -32,16 +33,25 @@ export default function RegisterPage() {
     }
 
     try {
+      // Register automatically logs in the user and returns token + user info
       await authService.register(
         formData.fullName,
         formData.email,
         formData.password
       );
-      // Auto login after successful registration
-      await authService.login(formData.email, formData.password);
       router.push("/dashboard");
     } catch (err: any) {
-      setError(err.response?.data?.message || "Registration failed");
+      console.error("Registration error:", err);
+      if (err instanceof ApolloError) {
+        // Handle GraphQL errors
+        const errorMessage =
+          err.graphQLErrors?.[0]?.message ||
+          err.message ||
+          "Registration failed";
+        setError(errorMessage);
+      } else {
+        setError("Registration failed. Please try again.");
+      }
     } finally {
       setLoading(false);
     }

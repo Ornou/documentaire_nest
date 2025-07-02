@@ -3,14 +3,20 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { authService } from "@/services/auth";
-import { client, GET_ALL_DOCUMENTS } from "@/services/graphql";
+import { client, GET_ALL_DOCUMENTS, DELETE_DOCUMENT } from "@/services/graphql";
 import {
   MagnifyingGlassIcon,
   Squares2X2Icon,
   ListBulletIcon,
   ArrowRightOnRectangleIcon,
   PlusIcon,
+  PencilIcon,
+  TrashIcon,
+  EllipsisVerticalIcon,
 } from "@heroicons/react/24/outline";
+import { ApolloError } from "@apollo/client";
+import DocumentModal from "@/components/DocumentModal";
+import ConfirmModal from "@/components/ConfirmModal";
 
 interface Document {
   id: number;
@@ -27,6 +33,19 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+
+  // Modal states
+  const [isDocumentModalOpen, setIsDocumentModalOpen] = useState(false);
+  const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
+  const [selectedDocument, setSelectedDocument] = useState<Document | null>(
+    null
+  );
+  const [modalMode, setModalMode] = useState<"create" | "edit">("create");
+  const [deleteLoading, setDeleteLoading] = useState(false);
+
+  // Dropdown states
+  const [openDropdown, setOpenDropdown] = useState<number | null>(null);
+
   const router = useRouter();
 
   useEffect(() => {
@@ -65,6 +84,59 @@ export default function DashboardPage() {
   const handleLogout = () => {
     authService.logout();
     router.push("/auth/login");
+  };
+
+  const handleUploadClick = () => {
+    setModalMode("create");
+    setSelectedDocument(null);
+    setIsDocumentModalOpen(true);
+  };
+
+  const handleEditClick = (document: Document) => {
+    setModalMode("edit");
+    setSelectedDocument(document);
+    setIsDocumentModalOpen(true);
+    setOpenDropdown(null);
+  };
+
+  const handleDeleteClick = (document: Document) => {
+    setSelectedDocument(document);
+    setIsConfirmModalOpen(true);
+    setOpenDropdown(null);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!selectedDocument) return;
+
+    setDeleteLoading(true);
+    try {
+      await client.mutate({
+        mutation: DELETE_DOCUMENT,
+        variables: {
+          id: selectedDocument.id,
+        },
+      });
+
+      // Remove from local state
+      setDocuments((prev) =>
+        prev.filter((doc) => doc.id !== selectedDocument.id)
+      );
+      setIsConfirmModalOpen(false);
+      setSelectedDocument(null);
+    } catch (err: any) {
+      console.error("Delete error:", err);
+      // You might want to show an error toast here
+    } finally {
+      setDeleteLoading(false);
+    }
+  };
+
+  const handleDocumentSuccess = () => {
+    fetchDocuments(); // Refresh the list
+  };
+
+  const toggleDropdown = (docId: number) => {
+    setOpenDropdown(openDropdown === docId ? null : docId);
   };
 
   const getFileIcon = (filename: string) => {
@@ -261,7 +333,10 @@ export default function DashboardPage() {
             </div>
 
             {/* Upload Button */}
-            <button className="flex items-center space-x-2 bg-primary-500 hover:bg-primary-600 text-white px-4 py-2 rounded-lg transition-colors">
+            <button
+              onClick={handleUploadClick}
+              className="flex items-center space-x-2 bg-primary-500 hover:bg-primary-600 text-white px-4 py-2 rounded-lg transition-colors"
+            >
               <PlusIcon className="h-4 w-4" />
               <span>Upload</span>
             </button>
@@ -300,7 +375,10 @@ export default function DashboardPage() {
             <p className="text-gray-600 mb-6">
               Get started by uploading your first document.
             </p>
-            <button className="bg-primary-500 hover:bg-primary-600 text-white px-6 py-2 rounded-lg transition-colors">
+            <button
+              onClick={handleUploadClick}
+              className="bg-primary-500 hover:bg-primary-600 text-white px-6 py-2 rounded-lg transition-colors"
+            >
               Upload Document
             </button>
           </div>
@@ -313,13 +391,42 @@ export default function DashboardPage() {
             }
           >
             {filteredDocuments.map((doc) => (
-              <div key={doc.id} className="document-card">
+              <div key={doc.id} className="document-card relative group">
                 {viewMode === "grid" ? (
                   <>
                     <div className="flex items-start justify-between mb-3">
                       {getFileIcon(doc.title)}
-                      <div className="text-xs text-gray-500">
-                        {formatDate(doc.createdAt)}
+                      <div className="flex items-center space-x-2">
+                        <div className="text-xs text-gray-500">
+                          {formatDate(doc.createdAt)}
+                        </div>
+                        {/* Actions Dropdown */}
+                        <div className="relative">
+                          <button
+                            onClick={() => toggleDropdown(doc.id)}
+                            className="p-1 text-gray-400 hover:text-gray-600 rounded"
+                          >
+                            <EllipsisVerticalIcon className="w-4 h-4" />
+                          </button>
+                          {openDropdown === doc.id && (
+                            <div className="absolute right-0 mt-1 w-32 bg-white rounded-md shadow-lg z-10 border">
+                              <button
+                                onClick={() => handleEditClick(doc)}
+                                className="flex items-center w-full px-3 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                              >
+                                <PencilIcon className="w-4 h-4 mr-2" />
+                                Edit
+                              </button>
+                              <button
+                                onClick={() => handleDeleteClick(doc)}
+                                className="flex items-center w-full px-3 py-2 text-sm text-red-600 hover:bg-red-50"
+                              >
+                                <TrashIcon className="w-4 h-4 mr-2" />
+                                Delete
+                              </button>
+                            </div>
+                          )}
+                        </div>
                       </div>
                     </div>
                     <h3 className="font-medium text-gray-900 mb-1 line-clamp-2">
@@ -352,6 +459,33 @@ export default function DashboardPage() {
                         {formatDate(doc.createdAt)}
                       </div>
                     </div>
+                    {/* List Actions */}
+                    <div className="relative">
+                      <button
+                        onClick={() => toggleDropdown(doc.id)}
+                        className="p-1 text-gray-400 hover:text-gray-600 rounded"
+                      >
+                        <EllipsisVerticalIcon className="w-4 h-4" />
+                      </button>
+                      {openDropdown === doc.id && (
+                        <div className="absolute right-0 mt-1 w-32 bg-white rounded-md shadow-lg z-10 border">
+                          <button
+                            onClick={() => handleEditClick(doc)}
+                            className="flex items-center w-full px-3 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                          >
+                            <PencilIcon className="w-4 h-4 mr-2" />
+                            Edit
+                          </button>
+                          <button
+                            onClick={() => handleDeleteClick(doc)}
+                            className="flex items-center w-full px-3 py-2 text-sm text-red-600 hover:bg-red-50"
+                          >
+                            <TrashIcon className="w-4 h-4 mr-2" />
+                            Delete
+                          </button>
+                        </div>
+                      )}
+                    </div>
                   </div>
                 )}
               </div>
@@ -359,6 +493,34 @@ export default function DashboardPage() {
           </div>
         )}
       </main>
+
+      {/* Document Modal */}
+      <DocumentModal
+        isOpen={isDocumentModalOpen}
+        onClose={() => setIsDocumentModalOpen(false)}
+        onSuccess={handleDocumentSuccess}
+        document={selectedDocument}
+        mode={modalMode}
+      />
+
+      {/* Delete Confirmation Modal */}
+      <ConfirmModal
+        isOpen={isConfirmModalOpen}
+        onClose={() => setIsConfirmModalOpen(false)}
+        onConfirm={handleDeleteConfirm}
+        title="Delete Document"
+        message={`Are you sure you want to delete "${selectedDocument?.title}"? This action cannot be undone.`}
+        confirmText="Delete"
+        loading={deleteLoading}
+      />
+
+      {/* Click outside to close dropdowns */}
+      {openDropdown && (
+        <div
+          className="fixed inset-0 z-5"
+          onClick={() => setOpenDropdown(null)}
+        />
+      )}
     </div>
   );
 }
