@@ -23,7 +23,27 @@ const authLink = setContext((_, { headers }) => {
 
 export const client = new ApolloClient({
   link: authLink.concat(httpLink),
-  cache: new InMemoryCache(),
+  cache: new InMemoryCache({
+    typePolicies: {
+      Query: {
+        fields: {
+          findAllDocuments: {
+            merge(existing = [], incoming) {
+              return incoming;
+            },
+          },
+        },
+      },
+    },
+  }),
+  defaultOptions: {
+    watchQuery: {
+      fetchPolicy: "cache-and-network",
+    },
+    query: {
+      fetchPolicy: "cache-first",
+    },
+  },
 });
 
 // Authentication Mutations
@@ -57,7 +77,7 @@ export const REGISTER_MUTATION = gql`
 
 // GraphQL Queries and Mutations
 export const GET_ALL_DOCUMENTS = gql`
-  query GetAllDocuments {
+  query FindAllDocuments {
     findAllDocuments {
       id
       title

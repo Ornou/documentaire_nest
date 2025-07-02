@@ -69,15 +69,63 @@ export default function DashboardPage() {
 
   const fetchDocuments = async () => {
     try {
+      setLoading(true);
+      console.log("=== FETCHING DOCUMENTS ===");
+      console.log("Token exists:", !!authService.getToken());
+      console.log(
+        "GraphQL URL:",
+        process.env.NEXT_PUBLIC_GRAPHQL_URL || "http://localhost:3000/graphql"
+      );
+
       const result = await client.query({
         query: GET_ALL_DOCUMENTS,
-        fetchPolicy: "cache-and-network",
+        fetchPolicy: "network-only", // Force fresh data from server
+        errorPolicy: "all",
       });
-      setDocuments(result.data.findAllDocuments);
-    } catch (error) {
-      console.error("Error fetching documents:", error);
+
+      console.log("Raw GraphQL result:", result);
+      console.log("Documents data:", result.data);
+      console.log("Documents array:", result.data?.findAllDocuments);
+
+      if (result.errors) {
+        console.error("GraphQL errors in result:", result.errors);
+      }
+
+      const documents = result.data?.findAllDocuments || [];
+      console.log("Setting documents:", documents.length);
+      setDocuments(documents);
+    } catch (error: any) {
+      console.error("=== ERROR FETCHING DOCUMENTS ===");
+      console.error("Full error:", error);
+      console.error("Error name:", error?.constructor?.name);
+      console.error("Error message:", error?.message);
+
+      if (error instanceof ApolloError) {
+        console.error("Apollo GraphQL errors:", error.graphQLErrors);
+        console.error("Apollo Network error:", error.networkError);
+        console.error("Apollo Error message:", error.message);
+
+        // Check for auth errors
+        const hasAuthError = error.graphQLErrors?.some(
+          (err) =>
+            err.message.includes("Unauthorized") ||
+            err.message.includes("Invalid token") ||
+            err.extensions?.code === "UNAUTHENTICATED"
+        );
+
+        if (hasAuthError) {
+          console.log("Authentication error detected, redirecting to login");
+          authService.logout();
+          router.push("/auth/login");
+          return;
+        }
+      }
+
+      // Set empty array on error to prevent UI issues
+      setDocuments([]);
     } finally {
       setLoading(false);
+      console.log("=== FETCH COMPLETE ===");
     }
   };
 
@@ -272,6 +320,12 @@ export default function DashboardPage() {
 
             {/* Actions */}
             <div className="flex items-center space-x-4">
+              <button
+                onClick={fetchDocuments}
+                className="text-sm text-gray-600 hover:text-gray-900 transition-colors"
+              >
+                Refresh
+              </button>
               <button
                 onClick={handleLogout}
                 className="flex items-center space-x-2 text-gray-600 hover:text-gray-900 transition-colors"
