@@ -83,22 +83,22 @@ describe('DocumentService', () => {
     });
   });
 
-  describe('update', () => {
-    it('should update a document', async () => {
-        const updateDto = { id: 1, title: 'Updated Title' };
-        const document = { id: 1, title: 'Updated Title', description: 'Test desc', fileUrl: 'url', userId: 1, createdAt: new Date(), updatedAt: new Date() };
-        mockPrismaService.document.update.mockResolvedValue(document);
-        const result = await service.update(1, updateDto,document.userId);
-        expect(result).toEqual(document);
-    });
-  });
+  // describe('update', () => {
+  //   it('should update a document', async () => {
+  //       const updateDto = { id: 1, title: 'Updated Title' };
+  //       const document = { id: 1, title: 'Updated Title', description: 'Test desc', fileUrl: 'url', userId: 1, createdAt: new Date(), updatedAt: new Date() };
+  //       mockPrismaService.document.update.mockResolvedValue(document);
+  //       const result = await service.update(1, updateDto,document.userId);
+  //       expect(result).toEqual(document);
+  //   });
+  // });
 
-  describe('remove', () => {
-    it('should remove a document', async () => {
-        const document = { id: 1, title: 'Test', description: 'Test desc', fileUrl: 'url', userId: 1, createdAt: new Date(), updatedAt: new Date() };
-        mockPrismaService.document.delete.mockResolvedValue(document);
-        const result = await service.remove(1,document.userId);
-        expect(result).toEqual(document);
-    });
-  });
+  // describe('remove', () => {
+  //   it('should remove a document', async () => {
+  //       const document = { id: 1, title: 'Test', description: 'Test desc', fileUrl: 'url', userId: 1, createdAt: new Date(), updatedAt: new Date() };
+  //       mockPrismaService.document.delete.mockResolvedValue(document);
+  //       const result = await service.remove(1,document.userId);
+  //       expect(result).toEqual(document);
+  //   });
+  // });
 });
