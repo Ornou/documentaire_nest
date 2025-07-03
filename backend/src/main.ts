@@ -11,7 +11,7 @@ async function bootstrap() {
 
   // Configuration CORS
   app.enableCors({
-    origin: ['http://localhost:3001', 'http://localhost:3000'],
+    origin: ['http://localhost:3001', 'http://localhost:3000','https://webfront-document-manager.onrender.com'],
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
     allowedHeaders: [
       'Content-Type',
