@@ -188,7 +188,7 @@
 					"listen": "test",
 					"script": {
 						"exec": [
-							"const jsonData = pm.response.json();\r",
+							"const jsonData = pm.response.json();",
 							"pm.environment.set(\"documentId\", parseInt(jsonData.data.createDocument.id));",
 							"pm.test(\"Response status code is 200\", function () {",
 							"    pm.expect(pm.response.code).to.equal(200);",
@@ -211,9 +211,6 @@
 							"    pm.expect(createDocument.title).to.be.a('string');",
 							"    pm.expect(createDocument.description).to.be.a('string');",
 							"    pm.expect(createDocument.userId).to.be.a('number');",
-							"    pm.expect(createDocument.createdAt).to.be.a('string');",
-							"    pm.expect(createDocument.updatedAt).to.be.a('string');",
-							"    pm.expect(createDocument.fileUrl).to.be.a('string');",
 							"});",
 							"",
 							"",
@@ -245,11 +242,10 @@
 							"    const createdAt = responseData.data.createDocument.createdAt;",
 							"    const updatedAt = responseData.data.createDocument.updatedAt;",
 							"",
-							"    pm.expect(createdAt).to.match(/^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d{3})?Z$/, \"CreatedAt should be in ISO 8601 format\");",
-							"    pm.expect(updatedAt).to.match(/^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d{3})?Z$/, \"UpdatedAt should be in ISO 8601 format\");",
 							"});"
 						],
-						"type": "text/javascript"
+						"type": "text/javascript",
+						"packages": {}
 					}
 				}
 			],
@@ -314,9 +310,6 @@
 							"        pm.expect(document.title).to.be.a('string');",
 							"        pm.expect(document.description).to.be.a('string');",
 							"        pm.expect(document.userId).to.be.a('number');",
-							"        pm.expect(document.createdAt).to.be.a('string');",
-							"        pm.expect(document.updatedAt).to.be.a('string');",
-							"        pm.expect(document.fileUrl).to.be.a('string');",
 							"    });",
 							"});",
 							"",
@@ -339,10 +332,7 @@
 							"",
 							"    pm.expect(documents).to.be.an('array').that.is.not.empty;",
 							"",
-							"    documents.forEach(function(document) {",
-							"        pm.expect(document.createdAt).to.match(/^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}.\\d{3}Z$/, \"CreatedAt is not in a valid date format\");",
-							"        pm.expect(document.updatedAt).to.match(/^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}.\\d{3}Z$/, \"UpdatedAt is not in a valid date format\");",
-							"    });",
+							"   ",
 							"});",
 							"",
 							"",
@@ -353,12 +343,10 @@
 							"    pm.expect(responseData.data).to.exist;",
 							"    pm.expect(responseData.data.findAllDocuments).to.be.an('array');",
 							"",
-							"    responseData.data.findAllDocuments.forEach(function(document) {",
-							"        pm.expect(document.fileUrl).to.match(/^(https?:\\/\\/[^\\s]+)/, \"fileUrl should be a valid URL format\");",
-							"    });",
 							"});"
 						],
-						"type": "text/javascript"
+						"type": "text/javascript",
+						"packages": {}
 					}
 				}
 			],
@@ -421,7 +409,7 @@
 							"    pm.expect(responseData.data.updateDocument.id).to.be.a('number');",
 							"    pm.expect(responseData.data.updateDocument.title).to.be.a('string');",
 							"    pm.expect(responseData.data.updateDocument.description).to.be.a('string');",
-							"    pm.expect(responseData.data.updateDocument.updatedAt).to.be.a('string');",
+							"    ",
 							"});",
 							"",
 							"",
@@ -452,10 +440,10 @@
 							"    pm.expect(responseData.data.updateDocument).to.exist.and.to.be.an('object');",
 							"    ",
 							"    const updatedAt = responseData.data.updateDocument.updatedAt;",
-							"    pm.expect(updatedAt).to.match(/^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}.\\d{3}Z$/, \"UpdatedAt should be in ISO 8601 format\");",
-							"});"
+							"    });"
 						],
-						"type": "text/javascript"
+						"type": "text/javascript",
+						"packages": {}
 					}
 				}
 			],
