@@ -1,0 +1,91 @@
+# ------------------------------------------------------
+# THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+# ------------------------------------------------------
+
+type Document {
+  id: Int!
+  title: String!
+  description: String!
+  fileUrl: String
+  userId: Int!
+  createdAt: Timestamp!
+  updatedAt: Timestamp!
+}
+
+"""
+`Date` type as integer. Type represents date and time as number of milliseconds from start of UNIX epoch.
+"""
+scalar Timestamp
+
+type User {
+  id: Int!
+  name: String!
+  email: String!
+  role: String
+}
+
+type AuthPayload {
+  access_token: String!
+  user: User!
+}
+
+type Query {
+  findAllDocuments: [Document!]!
+  findOneDocument(id: Int!): Document!
+  user(id: Int!): User!
+}
+
+type Mutation {
+  createDocument(createDocumentInput: CreateDocumentInput!): Document!
+  uploadDocument(title: String!, description: String, file: Upload): Document!
+  updateDocumentWithFile(id: Int!, title: String!, description: String, file: Upload): Document!
+  updateDocument(id: Int!, updateDocumentInput: UpdateDocumentInput!): Document!
+  removeDocument(id: Int!): Document!
+  createUser(createUserInput: CreateUserInput!): User!
+  updateUser(updateUserInput: UpdateUserInput!): User!
+  removeUser(id: Int!): User!
+  register(registerInput: RegisterInput!): AuthPayload!
+  login(loginInput: LoginInput!): AuthPayload!
+}
+
+input CreateDocumentInput {
+  title: String!
+  description: String
+  fileUrl: String
+}
+
+"""The `Upload` scalar type represents a file upload."""
+scalar Upload
+
+input UpdateDocumentInput {
+  title: String
+  description: String
+  fileUrl: String
+  id: Int!
+}
+
+input CreateUserInput {
+  name: String!
+  email: String!
+  password: String!
+  role: String
+}
+
+input UpdateUserInput {
+  name: String
+  email: String
+  password: String
+  role: String
+  id: Int!
+}
+
+input RegisterInput {
+  name: String!
+  email: String!
+  password: String!
+}
+
+input LoginInput {
+  email: String!
+  password: String!
+}

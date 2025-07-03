@@ -4,8 +4,8 @@ import { InputType, Field } from '@nestjs/graphql';
 export class CreateDocumentInput {
   @Field(() => String)
   title: string;
-  @Field(() => String)
-  description: string;
+  @Field(() => String, { nullable: true })
+  description?: string;
   @Field({ nullable: true })
   fileUrl?: string;
 }

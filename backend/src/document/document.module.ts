@@ -7,10 +7,16 @@ import { DocumentResolver } from './document.resolver';
 import { DocumentConsumer } from './document.consumer';
 
 @Module({
-  imports: [BullModule.registerQueue({
+  imports: [
+    BullModule.registerQueue({
       name: 'document',
     }),
-    ConfigModule, JwtModule.register({ secret: process.env.JWT_SECRET || 'secret', signOptions: { expiresIn: '1d' } })],
+    ConfigModule, 
+    JwtModule.register({ 
+      secret: process.env.JWT_SECRET || 'secret', 
+      signOptions: { expiresIn: '1d' } 
+    })
+  ],
   providers: [DocumentResolver, DocumentService, DocumentConsumer], 
   exports: [JwtModule]
 })

@@ -1,14 +1,14 @@
-import {
-  ApolloClient,
-  InMemoryCache,
-  createHttpLink,
-  gql,
-} from "@apollo/client";
+import { ApolloClient, InMemoryCache, gql } from "@apollo/client";
 import { setContext } from "@apollo/client/link/context";
 import Cookies from "js-cookie";
+import { createUploadLink } from "apollo-upload-client";
 
-const httpLink = createHttpLink({
+const uploadLink = createUploadLink({
   uri: process.env.NEXT_PUBLIC_GRAPHQL_URL || "http://localhost:3000/graphql",
+  credentials: 'include',
+  headers: {
+    'Apollo-Require-Preflight': 'true',
+  },
 });
 
 const authLink = setContext((_, { headers }) => {
@@ -22,7 +22,7 @@ const authLink = setContext((_, { headers }) => {
 });
 
 export const client = new ApolloClient({
-  link: authLink.concat(httpLink),
+  link: authLink.concat(uploadLink),
   cache: new InMemoryCache({
     typePolicies: {
       Query: {
@@ -107,9 +107,16 @@ export const CREATE_DOCUMENT = gql`
 export const UPDATE_DOCUMENT = gql`
   mutation UpdateDocument(
     $id: Int!
-    $updateDocumentInput: UpdateDocumentInput!
+    $title: String!
+    $description: String
+    $file: Upload
   ) {
-    updateDocument(id: $id, updateDocumentInput: $updateDocumentInput) {
+    updateDocumentWithFile(
+      id: $id
+      title: $title
+      description: $description
+      file: $file
+    ) {
       id
       title
       description
@@ -124,6 +131,24 @@ export const UPDATE_DOCUMENT = gql`
 export const DELETE_DOCUMENT = gql`
   mutation RemoveDocument($id: Int!) {
     removeDocument(id: $id) {
+      id
+      title
+      description
+      fileUrl
+      userId
+      createdAt
+      updatedAt
+    }
+  }
+`;
+
+export const UPLOAD_DOCUMENT = gql`
+  mutation UploadDocument(
+    $title: String!
+    $description: String
+    $file: Upload
+  ) {
+    uploadDocument(title: $title, description: $description, file: $file) {
       id
       title
       description

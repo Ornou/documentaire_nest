@@ -510,6 +510,19 @@ export default function DashboardPage() {
                                 <PencilIcon className="w-4 h-4 mr-2" />
                                 Edit
                               </button>
+                              <a
+                                href={doc.fileUrl?.startsWith('http') ? doc.fileUrl : `http://localhost:3000${doc.fileUrl}`}
+                                download
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="flex items-center w-full px-3 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                                onClick={(e) => e.stopPropagation()}
+                              >
+                                <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                                </svg>
+                                Download
+                              </a>
                               <button
                                 onClick={() => handleDeleteClick(doc)}
                                 className="flex items-center w-full px-3 py-2 text-sm text-red-600 hover:bg-red-50"
@@ -569,6 +582,19 @@ export default function DashboardPage() {
                             <PencilIcon className="w-4 h-4 mr-2" />
                             Edit
                           </button>
+                          <a
+                            href={doc.fileUrl?.startsWith('http') ? doc.fileUrl : `http://localhost:3000${doc.fileUrl}`}
+                            download
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex items-center w-full px-3 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                            </svg>
+                            Download
+                          </a>
                           <button
                             onClick={() => handleDeleteClick(doc)}
                             className="flex items-center w-full px-3 py-2 text-sm text-red-600 hover:bg-red-50"

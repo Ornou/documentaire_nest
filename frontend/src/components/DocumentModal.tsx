@@ -2,7 +2,12 @@
 
 import React, { useState, useEffect } from "react";
 import { XMarkIcon, DocumentArrowUpIcon } from "@heroicons/react/24/outline";
-import { client, CREATE_DOCUMENT, UPDATE_DOCUMENT } from "@/services/graphql";
+import {
+  client,
+  CREATE_DOCUMENT,
+  UPDATE_DOCUMENT,
+  UPLOAD_DOCUMENT,
+} from "@/services/graphql";
 import { ApolloError } from "@apollo/client";
 
 interface Document {
@@ -34,6 +39,7 @@ export default function DocumentModal({
     description: "",
     fileUrl: "",
   });
+  const [selectedFile, setSelectedFile] = useState<File | null>(null); // Ajouté pour gérer le fichier
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -64,30 +70,40 @@ export default function DocumentModal({
 
     try {
       if (mode === "create") {
+        const variables: any = {
+          title: formData.title,
+          description: formData.description || undefined,
+        };
+
+        // Only include file in variables if it exists
+        if (selectedFile) {
+          variables.file = selectedFile;
+        }
+
         await client.mutate({
-          mutation: CREATE_DOCUMENT,
-          variables: {
-            createDocumentInput: {
-              title: formData.title,
-              description: formData.description,
-              fileUrl: formData.fileUrl || null,
-            },
-          },
+          mutation: UPLOAD_DOCUMENT,
+          variables,
           errorPolicy: "all",
           refetchQueries: ["FindAllDocuments"],
         });
       } else if (mode === "edit" && document) {
+        const variables: any = {
+          id: document.id,
+          title: formData.title,
+          description: formData.description || undefined,
+        };
+
+        // Si un nouveau fichier est sélectionné, l'ajouter aux variables
+        if (selectedFile) {
+          variables.file = selectedFile;
+        } else if (!formData.fileUrl && document.fileUrl) {
+          // Si le fichier a été supprimé (fileUrl est vide mais il y avait un fichier avant)
+          variables.file = null;
+        }
+
         await client.mutate({
           mutation: UPDATE_DOCUMENT,
-          variables: {
-            id: document.id,
-            updateDocumentInput: {
-              id: document.id,
-              title: formData.title,
-              description: formData.description,
-              fileUrl: formData.fileUrl || null,
-            },
-          },
+          variables,
           errorPolicy: "all",
           refetchQueries: ["FindAllDocuments"],
         });
@@ -139,10 +155,9 @@ export default function DocumentModal({
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      // In a real app, you would upload the file to a storage service
-      // For now, we'll just use the file name as a placeholder
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      setSelectedFile(file);
       setFormData((prev) => ({
         ...prev,
         fileUrl: file.name,
@@ -233,9 +248,10 @@ export default function DocumentModal({
               <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center hover:border-primary-400 transition-colors">
                 <input
                   type="file"
+                  id="file-upload"
+                  name="file"
                   onChange={handleFileChange}
                   className="hidden"
-                  id="file-upload"
                   accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png,.gif"
                 />
                 <label
@@ -257,11 +273,34 @@ export default function DocumentModal({
 
             {/* Current File Info (Edit mode) */}
             {mode === "edit" && document?.fileUrl && (
-              <div className="bg-gray-50 p-3 rounded-lg">
-                <p className="text-sm text-gray-600">
-                  Current file:{" "}
-                  <span className="font-medium">{document.fileUrl}</span>
-                </p>
+              <div className="bg-gray-50 p-3 rounded-lg flex items-center space-x-4">
+                <div>
+                  <p className="text-sm text-gray-600">
+                    Current file:{" "}
+                    <span className="font-medium">{document.fileUrl}</span>
+                  </p>
+                  {/* File preview for images */}
+                  {/\.(jpg|jpeg|png|gif)$/i.test(document.fileUrl) && (
+                    <img
+                      src={
+                        document.fileUrl.startsWith("http")
+                          ? document.fileUrl
+                          : `/uploads/${document.fileUrl}`
+                      }
+                      alt="Preview"
+                      className="mt-2 max-h-32 rounded border"
+                    />
+                  )}
+                </div>
+                <a
+  href={document.fileUrl.startsWith('http') ? document.fileUrl : `http://localhost:3000${document.fileUrl}`}
+  download
+  target="_blank"
+  rel="noopener noreferrer"
+  className="px-3 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 text-sm"
+>
+  Download
+</a>
               </div>
             )}
 
