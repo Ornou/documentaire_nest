@@ -1,0 +1,672 @@
+{
+	"info": {
+		"_postman_id": "8ab210dd-05b6-409f-b2cd-7a92e7766be7",
+		"name": "Tests Integration Doc Manager",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "25152666"
+	},
+	"item": [
+		{
+			"name": "Register User",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Response status code is 200\", function () {",
+							"    pm.expect(pm.response.code).to.equal(200);",
+							"});",
+							"",
+							"",
+							"pm.test(\"Response has an 'errors' field\", function () {",
+							"    const responseData = pm.response.json();",
+							"    ",
+							"    pm.expect(responseData).to.be.an('object');",
+							"    pm.expect(responseData.errors).to.exist;",
+							"});",
+							"",
+							"",
+							"pm.test(\"The 'data' field must be null when there are errors\", function () {",
+							"    const responseData = pm.response.json();",
+							"    ",
+							"    pm.expect(responseData).to.be.an('object');",
+							"    pm.expect(responseData.data).to.be.null;",
+							"    pm.expect(responseData.errors).to.exist.and.to.be.an('array').that.is.not.empty;",
+							"});",
+							"",
+							"",
+							"pm.test(\"The message field in errors must be a non-empty string\", function () {",
+							"    const responseData = pm.response.json();",
+							"    ",
+							"    pm.expect(responseData.errors).to.be.an('array').that.is.not.empty;",
+							"    responseData.errors.forEach(error => {",
+							"        pm.expect(error.message).to.exist.and.to.be.a('string').and.to.have.lengthOf.at.least(1, \"Value should not be empty\");",
+							"    });",
+							"});",
+							"",
+							"",
+							"pm.test(\"Ensure that the 'extensions' object contains a 'code' field\", function () {",
+							"    const responseData = pm.response.json();",
+							"    ",
+							"    pm.expect(responseData).to.have.property('errors').that.is.an('array').that.is.not.empty;",
+							"    responseData.errors.forEach(error => {",
+							"        pm.expect(error).to.have.property('extensions').that.is.an('object');",
+							"        pm.expect(error.extensions).to.have.property('code');",
+							"    });",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "mutation {\r\n  register(registerInput: {\r\n    name: \"Ornelle\"\r\n    email: \"ornelleInteTest@example.com\",\r\n    password: \"password123\"\r\n  }) { user { id email name }\r\n}\r\n}",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://doc-manager-yjih.onrender.com/graphQL",
+					"protocol": "https",
+					"host": [
+						"doc-manager-yjih",
+						"onrender",
+						"com"
+					],
+					"path": [
+						"graphQL"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Login User",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"const jsonData = pm.response.json();\r",
+							"pm.environment.set(\"jwtToken\",jsonData.data.login.access_token);\r",
+							"pm.environment.set(\"userId\",parseInt(jsonData.data.login.user.id));",
+							"pm.test(\"Response status code is 200\", function () {",
+							"    pm.expect(pm.response.code).to.eql(200);",
+							"});",
+							"",
+							"",
+							"pm.test(\"Access token must be present\", function () {",
+							"    const responseData = pm.response.json();",
+							"    ",
+							"    pm.expect(responseData).to.be.an('object');",
+							"    pm.expect(responseData.data).to.exist;",
+							"    pm.expect(responseData.data.login).to.exist;",
+							"    pm.expect(responseData.data.login.access_token).to.exist.and.to.be.a('string').and.to.have.lengthOf.above(0, \"Access token should not be empty\");",
+							"});",
+							"",
+							"",
+							"pm.test(\"Validate the user object structure\", function () {",
+							"    const responseData = pm.response.json();",
+							"",
+							"    pm.expect(responseData).to.be.an('object');",
+							"    pm.expect(responseData.data).to.be.an('object');",
+							"    pm.expect(responseData.data.login).to.be.an('object');",
+							"    pm.expect(responseData.data.login.user).to.be.an('object');",
+							"",
+							"    const user = responseData.data.login.user;",
+							"    pm.expect(user).to.have.all.keys('id', 'email', 'name', 'role');",
+							"    ",
+							"    pm.expect(user.id).to.be.a('number');",
+							"    pm.expect(user.email).to.be.a('string').and.to.match(/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/, \"Email format is invalid\");",
+							"    pm.expect(user.name).to.be.a('string');",
+							"    pm.expect(user.role).to.be.a('string');",
+							"});",
+							"",
+							"",
+							"pm.test(\"Email is in a valid format\", function () {",
+							"    const responseData = pm.response.json();",
+							"    ",
+							"    pm.expect(responseData).to.be.an('object');",
+							"    pm.expect(responseData.data).to.exist;",
+							"    pm.expect(responseData.data.login).to.exist;",
+							"    pm.expect(responseData.data.login.user).to.exist;",
+							"    ",
+							"    const email = responseData.data.login.user.email;",
+							"    const emailRegex = /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/;",
+							"    ",
+							"    pm.expect(email).to.match(emailRegex, \"Email format is invalid\");",
+							"});",
+							"",
+							"",
+							"pm.test(\"Role must be one of the expected values\", function () {",
+							"    const responseData = pm.response.json();",
+							"    const expectedRoles = [\"admin\", \"user\", \"guest\"]; // Add other expected roles as necessary",
+							"",
+							"    pm.expect(responseData).to.be.an('object');",
+							"    pm.expect(responseData.data.login).to.exist;",
+							"    pm.expect(responseData.data.login.user).to.exist;",
+							"    pm.expect(expectedRoles).to.include(responseData.data.login.user.role);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "mutation {\r\n  login(loginInput: {\r\n    email: \"ornelleInteTest@example.com\",\r\n    password: \"password123\"\r\n  }) {access_token user { id email name role }\r\n}\r\n}",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://doc-manager-yjih.onrender.com/graphQL",
+					"protocol": "https",
+					"host": [
+						"doc-manager-yjih",
+						"onrender",
+						"com"
+					],
+					"path": [
+						"graphQL"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create document",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"const jsonData = pm.response.json();\r",
+							"pm.environment.set(\"documentId\", parseInt(jsonData.data.createDocument.id));",
+							"pm.test(\"Response status code is 200\", function () {",
+							"    pm.expect(pm.response.code).to.equal(200);",
+							"});",
+							"",
+							"",
+							"pm.test(\"Validate the createDocument object\", function () {",
+							"    const responseData = pm.response.json();",
+							"    ",
+							"    pm.expect(responseData).to.be.an('object');",
+							"    pm.expect(responseData.data).to.exist;",
+							"    pm.expect(responseData.data.createDocument).to.exist;",
+							"",
+							"    const createDocument = responseData.data.createDocument;",
+							"",
+							"    pm.expect(createDocument).to.be.an('object');",
+							"    pm.expect(createDocument).to.have.all.keys('id', 'title', 'description', 'userId', 'createdAt', 'updatedAt', 'fileUrl');",
+							"",
+							"    pm.expect(createDocument.id).to.be.a('number');",
+							"    pm.expect(createDocument.title).to.be.a('string');",
+							"    pm.expect(createDocument.description).to.be.a('string');",
+							"    pm.expect(createDocument.userId).to.be.a('number');",
+							"    pm.expect(createDocument.createdAt).to.be.a('string');",
+							"    pm.expect(createDocument.updatedAt).to.be.a('string');",
+							"    pm.expect(createDocument.fileUrl).to.be.a('string');",
+							"});",
+							"",
+							"",
+							"pm.test(\"Title is a non-empty string\", function () {",
+							"    const responseData = pm.response.json();",
+							"    ",
+							"    pm.expect(responseData).to.be.an('object');",
+							"    pm.expect(responseData.data).to.be.an('object');",
+							"    pm.expect(responseData.data.createDocument).to.be.an('object');",
+							"    pm.expect(responseData.data.createDocument.title).to.exist.and.to.be.a('string').and.to.have.lengthOf.at.least(1, \"Title should not be empty\");",
+							"});",
+							"",
+							"",
+							"pm.test(\"UserId is a positive integer\", function () {",
+							"    const responseData = pm.response.json();",
+							"    ",
+							"    pm.expect(responseData).to.be.an('object');",
+							"    pm.expect(responseData.data).to.have.property('createDocument');",
+							"    pm.expect(responseData.data.createDocument.userId).to.be.a('number').and.to.be.above(0);",
+							"});",
+							"",
+							"",
+							"pm.test(\"CreatedAt and UpdatedAt are in a valid date format\", function () {",
+							"    const responseData = pm.response.json();",
+							"    ",
+							"    pm.expect(responseData).to.be.an('object');",
+							"    pm.expect(responseData.data.createDocument).to.exist;",
+							"",
+							"    const createdAt = responseData.data.createDocument.createdAt;",
+							"    const updatedAt = responseData.data.createDocument.updatedAt;",
+							"",
+							"    pm.expect(createdAt).to.match(/^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d{3})?Z$/, \"CreatedAt should be in ISO 8601 format\");",
+							"    pm.expect(updatedAt).to.match(/^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d{3})?Z$/, \"UpdatedAt should be in ISO 8601 format\");",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{jwtToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "mutation {\r\n  createDocument(createDocumentInput: {\r\n    title: \"Mon autre doc txt\",\r\n    description: \"Ceci est un test\"\r\n  }) {\r\n    id\r\n    title\r\n    description\r\n    userId\r\n    createdAt\r\n    updatedAt\r\n    fileUrl\r\n  }\r\n}",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://doc-manager-yjih.onrender.com/graphQL",
+					"protocol": "https",
+					"host": [
+						"doc-manager-yjih",
+						"onrender",
+						"com"
+					],
+					"path": [
+						"graphQL"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get documents",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Response status code is 200\", function () {",
+							"    pm.expect(pm.response.code).to.equal(200);",
+							"});",
+							"",
+							"",
+							"pm.test(\"Validate the structure of the findAllDocuments array\", function () {",
+							"    const responseData = pm.response.json();",
+							"    ",
+							"    pm.expect(responseData).to.be.an('object');",
+							"    pm.expect(responseData.data).to.be.an('object');",
+							"    pm.expect(responseData.data.findAllDocuments).to.be.an('array');",
+							"",
+							"    responseData.data.findAllDocuments.forEach(function(document) {",
+							"        pm.expect(document).to.be.an('object');",
+							"        pm.expect(document).to.have.all.keys('id', 'title', 'description', 'userId', 'createdAt', 'updatedAt', 'fileUrl');",
+							"        pm.expect(document.id).to.be.a('number');",
+							"        pm.expect(document.title).to.be.a('string');",
+							"        pm.expect(document.description).to.be.a('string');",
+							"        pm.expect(document.userId).to.be.a('number');",
+							"        pm.expect(document.createdAt).to.be.a('string');",
+							"        pm.expect(document.updatedAt).to.be.a('string');",
+							"        pm.expect(document.fileUrl).to.be.a('string');",
+							"    });",
+							"});",
+							"",
+							"",
+							"pm.test(\"Title is a non-empty string\", function () {",
+							"    const responseData = pm.response.json();",
+							"    ",
+							"    pm.expect(responseData).to.be.an('object');",
+							"    pm.expect(responseData.data).to.have.property('findAllDocuments').that.is.an('array').that.is.not.empty;",
+							"    ",
+							"    responseData.data.findAllDocuments.forEach(function(document) {",
+							"        pm.expect(document.title).to.exist.and.to.be.a('string').and.to.have.lengthOf.at.least(1, \"Title should not be empty\");",
+							"    });",
+							"});",
+							"",
+							"",
+							"pm.test(\"CreatedAt and UpdatedAt are in a valid date format\", function () {",
+							"    const responseData = pm.response.json();",
+							"    const documents = responseData.data.findAllDocuments;",
+							"",
+							"    pm.expect(documents).to.be.an('array').that.is.not.empty;",
+							"",
+							"    documents.forEach(function(document) {",
+							"        pm.expect(document.createdAt).to.match(/^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}.\\d{3}Z$/, \"CreatedAt is not in a valid date format\");",
+							"        pm.expect(document.updatedAt).to.match(/^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}.\\d{3}Z$/, \"UpdatedAt is not in a valid date format\");",
+							"    });",
+							"});",
+							"",
+							"",
+							"pm.test(\"The fileUrl must be a valid URL format\", function () {",
+							"    const responseData = pm.response.json();",
+							"    ",
+							"    pm.expect(responseData).to.be.an('object');",
+							"    pm.expect(responseData.data).to.exist;",
+							"    pm.expect(responseData.data.findAllDocuments).to.be.an('array');",
+							"",
+							"    responseData.data.findAllDocuments.forEach(function(document) {",
+							"        pm.expect(document.fileUrl).to.match(/^(https?:\\/\\/[^\\s]+)/, \"fileUrl should be a valid URL format\");",
+							"    });",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{jwtToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "query {\r\n  findAllDocuments {\r\n    id\r\n    title\r\n    description\r\n    userId\r\n    createdAt\r\n    updatedAt\r\n    fileUrl\r\n  }\r\n}",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://doc-manager-yjih.onrender.com/graphQL",
+					"protocol": "https",
+					"host": [
+						"doc-manager-yjih",
+						"onrender",
+						"com"
+					],
+					"path": [
+						"graphQL"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Update Document",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Response status code is 200\", function () {",
+							"    pm.expect(pm.response.code).to.eql(200);",
+							"});",
+							"",
+							"",
+							"pm.test(\"Validate the updateDocument object\", function () {",
+							"    const responseData = pm.response.json();",
+							"",
+							"    pm.expect(responseData).to.be.an('object');",
+							"    pm.expect(responseData.data).to.exist.and.to.be.an('object');",
+							"    pm.expect(responseData.data.updateDocument).to.exist.and.to.be.an('object');",
+							"    ",
+							"    pm.expect(responseData.data.updateDocument).to.have.all.keys('id', 'title', 'description', 'updatedAt');",
+							"",
+							"    pm.expect(responseData.data.updateDocument.id).to.be.a('number');",
+							"    pm.expect(responseData.data.updateDocument.title).to.be.a('string');",
+							"    pm.expect(responseData.data.updateDocument.description).to.be.a('string');",
+							"    pm.expect(responseData.data.updateDocument.updatedAt).to.be.a('string');",
+							"});",
+							"",
+							"",
+							"pm.test(\"Title is a non-empty string\", function () {",
+							"    const responseData = pm.response.json();",
+							"    ",
+							"    pm.expect(responseData).to.be.an('object');",
+							"    pm.expect(responseData.data.updateDocument).to.exist;",
+							"    pm.expect(responseData.data.updateDocument.title).to.be.a('string').and.to.have.lengthOf.at.least(1, \"Title should not be empty\");",
+							"});",
+							"",
+							"",
+							"pm.test(\"Description must be a non-empty string\", function () {",
+							"    const responseData = pm.response.json();",
+							"    ",
+							"    pm.expect(responseData).to.be.an('object');",
+							"    pm.expect(responseData.data).to.exist;",
+							"    pm.expect(responseData.data.updateDocument).to.exist;",
+							"    pm.expect(responseData.data.updateDocument.description).to.exist.and.to.be.a('string').and.to.have.lengthOf.at.least(1, \"Description should not be empty\");",
+							"});",
+							"",
+							"",
+							"pm.test(\"UpdatedAt is in a valid date format\", function () {",
+							"    const responseData = pm.response.json();",
+							"    ",
+							"    pm.expect(responseData).to.be.an('object');",
+							"    pm.expect(responseData.data).to.exist.and.to.be.an('object');",
+							"    pm.expect(responseData.data.updateDocument).to.exist.and.to.be.an('object');",
+							"    ",
+							"    const updatedAt = responseData.data.updateDocument.updatedAt;",
+							"    pm.expect(updatedAt).to.match(/^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}.\\d{3}Z$/, \"UpdatedAt should be in ISO 8601 format\");",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{jwtToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "mutation UpdateDocument($id: Int!, $input: UpdateDocumentInput!) {\r\n  updateDocument(\r\n    id: $id,\r\n    updateDocumentInput: $input\r\n  ) {\r\n    id\r\n    title\r\n    description\r\n    updatedAt\r\n  }\r\n}",
+						"variables": "{\r\n  \"id\": {{documentId}},\r\n  \"input\": {\r\n    \"id\": {{documentId}},\r\n  \"title\": \"Nouveau titre\",\r\n  \"description\": \"Nouvelle description\"\r\n}\r\n}"
+					}
+				},
+				"url": {
+					"raw": "https://doc-manager-yjih.onrender.com/graphQL",
+					"protocol": "https",
+					"host": [
+						"doc-manager-yjih",
+						"onrender",
+						"com"
+					],
+					"path": [
+						"graphQL"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Remove Document",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Response status code is 200\", function () {",
+							"    pm.expect(pm.response.code).to.eql(200);",
+							"});",
+							"",
+							"",
+							"pm.test(\"Validate the removeDocument object\", function () {",
+							"    const responseData = pm.response.json();",
+							"    ",
+							"    pm.expect(responseData).to.be.an('object');",
+							"    pm.expect(responseData.data).to.exist;",
+							"    pm.expect(responseData.data.removeDocument).to.exist;",
+							"    ",
+							"    const removeDocument = responseData.data.removeDocument;",
+							"    pm.expect(removeDocument).to.be.an('object');",
+							"    pm.expect(removeDocument.id).to.exist.and.to.be.a('number');",
+							"    pm.expect(removeDocument.title).to.exist.and.to.be.a('string');",
+							"});",
+							"",
+							"",
+							"pm.test(\"ID is a non-negative integer\", function () {",
+							"    const responseData = pm.response.json();",
+							"    ",
+							"    pm.expect(responseData).to.be.an('object');",
+							"    pm.expect(responseData.data).to.be.an('object');",
+							"    pm.expect(responseData.data.removeDocument).to.be.an('object');",
+							"    pm.expect(responseData.data.removeDocument.id).to.be.a('number').and.to.be.at.least(0, \"ID must be a non-negative integer\");",
+							"});",
+							"",
+							"",
+							"pm.test(\"Title must be a non-empty string\", function () {",
+							"    const responseData = pm.response.json();",
+							"    ",
+							"    pm.expect(responseData).to.be.an('object');",
+							"    pm.expect(responseData.data).to.be.an('object');",
+							"    pm.expect(responseData.data.removeDocument).to.be.an('object');",
+							"    pm.expect(responseData.data.removeDocument.title).to.exist.and.to.be.a('string').and.to.have.lengthOf.at.least(1, \"Title should not be empty\");",
+							"});",
+							"",
+							"",
+							"pm.test(\"Response time is less than 500ms\", function () {",
+							"    pm.expect(pm.response.responseTime).to.be.below(500);",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{jwtToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "mutation removeDocument($id: Int!) {\r\n  removeDocument(id: $id) {\r\n    id\r\n    title\r\n  }\r\n}",
+						"variables": "{\r\n    \"id\": {{documentId}}\r\n}"
+					}
+				},
+				"url": {
+					"raw": "https://doc-manager-yjih.onrender.com/graphQL",
+					"protocol": "https",
+					"host": [
+						"doc-manager-yjih",
+						"onrender",
+						"com"
+					],
+					"path": [
+						"graphQL"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Remove User",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Response status code is 200\", function () {",
+							"    pm.expect(pm.response.code).to.equal(200);",
+							"});",
+							"",
+							"pm.test(\"Errors array is present in the response\", function () {",
+							"    const responseData = pm.response.json();",
+							"    ",
+							"    pm.expect(responseData).to.be.an('object');",
+							"    pm.expect(responseData.errors).to.exist.and.to.be.an('array');",
+							"});",
+							"",
+							"",
+							"pm.test(\"Each error object contains a message and valid extensions\", function () {",
+							"    const responseData = pm.response.json();",
+							"    ",
+							"    pm.expect(responseData).to.be.an('object');",
+							"    pm.expect(responseData.errors).to.be.an('array');",
+							"",
+							"    responseData.errors.forEach(function(error) {",
+							"        pm.expect(error).to.have.property('message').that.is.a('string');",
+							"        pm.expect(error).to.have.property('extensions').that.is.an('object');",
+							"        pm.expect(error.extensions).to.have.property('code').that.is.a('string');",
+							"    });",
+							"});",
+							"",
+							"",
+							"pm.test(\"The path must be an array and not empty\", function () {",
+							"    const responseData = pm.response.json();",
+							"    ",
+							"    pm.expect(responseData).to.be.an('object');",
+							"    pm.expect(responseData.errors).to.be.an('array').that.is.not.empty;",
+							"    ",
+							"    responseData.errors.forEach(error => {",
+							"        pm.expect(error.path).to.be.an('array').that.is.not.empty;",
+							"    });",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{jwtToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "mutation removeUser($id: Int!) {\r\n  removeUser(id: $id) {\r\n    id\r\n    name\r\n    email\r\n  }\r\n}",
+						"variables": "{\r\n    \"id\": {{userId}}\r\n}"
+					}
+				},
+				"url": {
+					"raw": "https://doc-manager-yjih.onrender.com/graphQL",
+					"protocol": "https",
+					"host": [
+						"doc-manager-yjih",
+						"onrender",
+						"com"
+					],
+					"path": [
+						"graphQL"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
