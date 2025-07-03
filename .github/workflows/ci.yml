@@ -31,14 +31,18 @@ jobs:
       #   working-directory: ./backend
       #   run: npm run lint
  
-      - name: Run tests
+      - name: Run unit tests
         working-directory: ./backend
         run: npm run test
  
       - name: Build
         working-directory: ./backend
         run: npm run build
- 
+
+      - name: Run Postman Tests
+        working-directory: ./backend/test
+        run: newman run TestsIntegrationDocManager.postman_collection.json -e Test.postman_environment.json
+
       - name: Login to Docker Hub
         run: docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
  
