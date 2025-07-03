@@ -1,13 +1,13 @@
 import { ApolloClient, InMemoryCache, gql } from "@apollo/client";
 import { setContext } from "@apollo/client/link/context";
 import Cookies from "js-cookie";
-import { createUploadLink } from "apollo-upload-client";
+import createUploadLink from "apollo-upload-client/createUploadLink.mjs";
 
 const uploadLink = createUploadLink({
   uri: process.env.NEXT_PUBLIC_GRAPHQL_URL || "http://localhost:3000/graphql",
-  credentials: 'include',
+  credentials: "include",
   headers: {
-    'Apollo-Require-Preflight': 'true',
+    "Apollo-Require-Preflight": "true",
   },
 });
 
