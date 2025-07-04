@@ -8,6 +8,7 @@ import { InjectQueue } from '@nestjs/bullmq';
 import * as fs from 'fs';
 import * as path from 'path';
 import { UpdateDocumentInput } from './dto/update-document.input';
+import { CurrentUser } from '../auth/current-user.decorator';
 
 @Injectable()
 export class DocumentService {
@@ -62,10 +63,14 @@ export class DocumentService {
   /**
    * Récupérer tous les documents
    */
-  async findAll() {
+
+  async findAll(user: any) {
+    console.log('userId:', user);
     return await this.prisma.document.findMany({
+      where: {userId: user.sub},
       include: { user: true },
     });
+
   }
 
   /**

@@ -69,7 +69,7 @@ describe('DocumentService', () => {
     it('should return an array of documents', async () => {
       const documents = [{ id: 1, title: 'Test', description: 'Test desc', fileUrl: 'url', userId: 1, createdAt: new Date(), updatedAt: new Date() }];
       mockPrismaService.document.findMany.mockResolvedValue(documents);
-      const result = await service.findAll();
+      const result = await service.findAll(1);
       expect(result).toEqual(documents);
     });
   });

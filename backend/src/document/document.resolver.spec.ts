@@ -64,7 +64,7 @@ describe('DocumentResolver', () => {
     it('should return an array of documents', async () => {
         const documents = [{ id: 1, title: 'Test', description: 'Test desc', fileUrl: 'url', userId: 1, createdAt: new Date(), updatedAt: new Date() }];
         mockDocumentService.findAll.mockResolvedValue(documents);
-        const result = await resolver.findAllDocuments();
+        const result = await resolver.findAllDocuments(1);
         expect(result).toEqual(documents);
     });
   });

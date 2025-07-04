@@ -34,6 +34,9 @@ export default function DashboardPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
 
+  console.log("token --", authService.getToken());
+
+
   // Modal states
   const [isDocumentModalOpen, setIsDocumentModalOpen] = useState(false);
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);

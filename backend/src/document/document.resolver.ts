@@ -159,8 +159,9 @@ export class DocumentResolver {
 
   @Query(() => [Document])
   @UseGuards(JwtAuthGuard)
-  async findAllDocuments() {
-    return this.documentService.findAll();
+  async findAllDocuments(@CurrentUser() user: any) {
+    
+    return this.documentService.findAll(user);
   }
 
   @Query(() => Document)
